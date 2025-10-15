@@ -75,27 +75,82 @@ CreatureMarine cree_creature(const char *nom) {
     return c;
 }
 
+CreatureMarine *cree_creatures(int Profondeur){
+
+    const char *listes_creatures[] = {"Meduse", "Poisson-Epee", "Requin", "Kraken", "CrabeGeant"};
+    int nbr_mobs;
+    double dificulte;
+    int random_number;
+    char nom[30];
+    
+    if (Profondeur == 1){
+        // combat 1v1
+        nbr_mobs = 1;
+        dificulte = 0.2;
+    
+    }else if(Profondeur == 2){
+        // combat 1v2
+        nbr_mobs = 2;
+        dificulte = 0.4;
+    }else if (Profondeur >=3){
+        // combat 1v3
+        nbr_mobs = 3;
+        dificulte = 0.9;
+
+    }
+    
+    CreatureMarine *creatures = malloc(sizeof(CreatureMarine) * (nbr_mobs));
+
+    for (int i = 0; i < nbr_mobs; i++) {
+        double r = (double)rand() / RAND_MAX;
+        int random_number;
+
+        if (r > dificulte) {
+            // mob facile
+            random_number = rand() % 2; // 0 or 1
+            strcpy(nom, listes_creatures[random_number]);
+        } else {
+            // mob difficile
+            random_number = 2 + rand() % 3; // 2, 3, 4
+            strcpy(nom, listes_creatures[random_number]);
+        }
+
+        creatures[i] = cree_creature(nom);
+    }
+    return creatures;
+}
+
+
 int main() {
     srand(time(NULL));
-    char nom_creature[30];
-    printf("Entrez le nom de la creature (Meduse, Poisson-Epee, Requin, Kraken, CrabeGeant): ");
-    scanf("%29s", nom_creature);
+    int profondeur = 3;// choisir ici la profondeur
+    int nbr_mobs;
 
-    if (!est_nom_valide(nom_creature)) {
-        printf("Nom invalide ! La creature n'a pas ete creee\n");
-        return 1; 
+    CreatureMarine *creatures = cree_creatures(profondeur);
+    
+    if (profondeur == 1) {
+        nbr_mobs = 1;
+    }
+    else if (profondeur == 2) {
+        nbr_mobs = 2;
+    }
+    else {
+        nbr_mobs = 3;
+    }
+    printf("=== Creatures generees pour Profondeur %d ===\n", profondeur);
+    for (int i = 0; i < nbr_mobs; i++) {
+        printf("%d - %s (PV: %d, ATK: %d-%d, DEF: %d, VITESSE: %d, EFFET_SPECIAL: %s)\n",
+               i + 1,
+               creatures[i].nom,
+               creatures[i].points_de_vie_max,
+               creatures[i].attaque_minimale,
+               creatures[i].attaque_maximale,
+               creatures[i].defense,
+               creatures[i].vitesse,
+               creatures[i].effet_special);
     }
 
-    CreatureMarine mob = cree_creature(nom_creature);
-
-    printf("%s (PV: %d, ATK: %d-%d, DEF: %d, VITESSE: %d, EFFET_SPECIAL: %s)\n",
-           mob.nom,
-           mob.points_de_vie_max,
-           mob.attaque_minimale,
-           mob.attaque_maximale,
-           mob.defense,
-           mob.vitesse,
-           mob.effet_special);
-
+    free(creatures); // libirer memoire
     return 0;
+
 }
