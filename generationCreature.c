@@ -2,11 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#define MAX_CREATURES 4
-
 
 typedef struct {
-    int id;  // identifiant unique pour cibler
+    int id;
     char nom[30];
     int points_de_vie_max;
     int points_de_vie_actuels;
@@ -14,70 +12,90 @@ typedef struct {
     int attaque_maximale;
     int defense;
     int vitesse;
-    char effet_special[20]; // "paralysie", "poison", "aucun"
+    char effet_special[20];
     int est_vivant;
 } CreatureMarine;
 
-CreatureMarine cree_creature(int id){
-    CreatureMarine c;
-    c.id = id;
-    c.est_vivant = 1;
-
-    switch (id)
-    {
-    case 1: 
-        strcpy(c.nom, "Meduse"); 
-        c.points_de_vie_max = rand()%21+20; c.points_de_vie_actuels = c.points_de_vie_max;
-        c.attaque_minimale=8; c.attaque_maximale=15; c.defense=0; c.vitesse=0; 
-        strcpy(c.effet_special,"Aucun"); //Paralysie
-        break;
-    case 2: 
-        strcpy(c.nom, "Poisson-Epee"); 
-        c.points_de_vie_max = rand()%21+70;c.points_de_vie_actuels = c.points_de_vie_max; c.attaque_minimale=18; 
-        c.attaque_maximale=28; c.defense=0; c.vitesse=0; 
-        strcpy(c.effet_special,"Aucun"); //Perforant
-        break;
-    case 3:
-        strcpy(c.nom, "Requin");c.points_de_vie_max = rand()%41+60; 
-        c.points_de_vie_actuels = c.points_de_vie_max;c.attaque_minimale=15; c.attaque_maximale=25; 
-        c.defense=0; c.vitesse=0; 
-        strcpy(c.effet_special,"Aucun");//Frenesie
-        break;
-    case 4: 
-        strcpy(c.nom, "Kraken");
-        c.points_de_vie_max = rand()%61+120; c.points_de_vie_actuels = c.points_de_vie_max;
-        c.attaque_minimale = 25;c.attaque_maximale = 40;
-        c.defense = 0;c.vitesse = 0;strcpy(c.effet_special, "Aucun");//Double_Attaque
-        break;
-    case 5: 
-        strcpy(c.nom, "Crabe Geant"); 
-        c.points_de_vie_max = rand()%41+80; c.points_de_vie_actuels = c.points_de_vie_max;c.attaque_minimale=12; 
-        c.attaque_maximale=20; c.defense=0; 
-        c.vitesse=0; strcpy(c.effet_special,"Aucun");//Carapace
-        break;
-    default: 
-        strcpy(c.nom,"Inconnu"); c.points_de_vie_max=50; 
-        c.attaque_minimale=10; c.attaque_maximale=15; 
-        c.defense=0; c.vitesse=0; 
-        strcpy(c.effet_special,"Aucun"); 
-        break;
+int est_nom_valide(const char *nom) {
+    const char *noms_valides[] = {
+        "Meduse", "Poisson-Epee", "Requin", "Kraken", "CrabeGeant"
+    };
+    int nb_noms = sizeof(noms_valides)/sizeof(noms_valides[0]);
+    for (int i = 0; i < nb_noms; i++) {
+        if (strcmp(nom, noms_valides[i]) == 0) {
+            return 1; 
+        }
     }
-    return c;   
+    return 0;
+}
+
+CreatureMarine cree_creature(const char *nom) {
+    CreatureMarine c;
+    c.est_vivant = 1;
+    c.id = 0;
+
+    strcpy(c.nom, nom);
+
+    // On adapte les stats selon le nom
+    if (strcmp(nom, "Meduse") == 0) {
+        c.points_de_vie_max = rand() % 21 + 20;
+        c.attaque_minimale = 8;
+        c.attaque_maximale = 15;
+        c.vitesse = 4;
+    }
+    else if (strcmp(nom, "Poisson-Epee") == 0) {
+        c.points_de_vie_max = rand() % 21 + 70;
+        c.attaque_minimale = 18;
+        c.attaque_maximale = 28;
+        c.vitesse = 3;
+    }
+    else if (strcmp(nom, "Requin") == 0) {
+        c.points_de_vie_max = rand() % 41 + 60;
+        c.attaque_minimale = 15;
+        c.attaque_maximale = 25;
+        c.vitesse = 5;
+    }
+    else if (strcmp(nom, "Kraken") == 0) {
+        c.points_de_vie_max = rand() % 61 + 120;
+        c.attaque_minimale = 25;
+        c.attaque_maximale = 40;
+        c.vitesse = 2;
+    }
+    else if (strcmp(nom, "CrabeGeant") == 0) {
+        c.points_de_vie_max = rand() % 41 + 80;
+        c.attaque_minimale = 12;
+        c.attaque_maximale = 20;
+        c.vitesse = 1;
+    }
+
+    c.points_de_vie_actuels = c.points_de_vie_max;
+    c.defense = 5;
+    strcpy(c.effet_special, "Aucun");
+
+    return c;
 }
 
 int main() {
     srand(time(NULL));
-    int nb;
-    int profondeur = 3;
+    char nom_creature[30];
+    printf("Entrez le nom de la creature (Meduse, Poisson-Epee, Requin, Kraken, CrabeGeant): ");
+    scanf("%29s", nom_creature);
 
-    CreatureMarine mob1 = cree_creature(3);
-    printf("%s (ID: %d ,PV: %d, ATK: %d, DEF: %d, VITESSE: %d, EFFET_SPECIAL: %s)\n",
-                    mob1.nom,
-                    mob1.id,
-                    mob1.points_de_vie_max,
-                    mob1.attaque_maximale,
-                    mob1.defense,
-                    mob1.vitesse,
-                    mob1.effet_special);
+    if (!est_nom_valide(nom_creature)) {
+        printf("Nom invalide ! La creature n'a pas ete creee\n");
+        return 1; 
+    }
 
+    CreatureMarine mob = cree_creature(nom_creature);
+
+    printf("%s (PV: %d, ATK: %d-%d, DEF: %d, VITESSE: %d, EFFET_SPECIAL: %s)\n",
+           mob.nom,
+           mob.points_de_vie_max,
+           mob.attaque_minimale,
+           mob.attaque_maximale,
+           mob.defense,
+           mob.vitesse,
+           mob.effet_special);
+
+    return 0;
 }
